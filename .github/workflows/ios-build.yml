@@ -11,13 +11,13 @@ jobs:
     runs-on: [self-hosted, macos-latest]
     steps:
       - name: 接入本地 Mac CI 集群
-        uses: local-mac-ci-cluster/local-mac-runner-action@v1
+        uses: local-mac-ci-cluster/local-mac-runner-action@main
 
       - name: 检出代码
         uses: actions/checkout@v4
 
       - name: 编译测试
-        uses: local-mac-ci-cluster/local-mac-runner-action@v1
+        uses: local-mac-ci-cluster/local-mac-runner-action@main
         with:
           scheme: "Kingfisher"        # 从 xcodebuild -list 获取
           workspace: ""               # 没有 .xcworkspace，留空
