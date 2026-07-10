@@ -20,6 +20,6 @@ jobs:
         uses: local-mac-ci-cluster/local-mac-runner-action@main
         with:
           scheme: "Kingfisher"        # 从 xcodebuild -list 获取
-          workspace: ""               # 没有 .xcworkspace，留空
+          workspace: "Kingfisher.xcodeproj"               # 没有 .xcworkspace，留空
           configuration: "Release"
           upload_artifact: "true"     # 会尝试上传，但 Kingfisher 不会生成 .ipa
