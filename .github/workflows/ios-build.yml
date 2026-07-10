@@ -1,0 +1,25 @@
+# .github/workflows/ios-build.yml
+name: iOS 编译测试
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: [self-hosted, macos-latest]
+    steps:
+      - name: 接入本地 Mac CI 集群
+        uses: local-mac-ci-cluster/local-mac-runner-action@v1
+
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 编译测试
+        uses: local-mac-ci-cluster/local-mac-runner-action@v1
+        with:
+          scheme: "Kingfisher"        # 从 xcodebuild -list 获取
+          workspace: ""               # 没有 .xcworkspace，留空
+          configuration: "Release"
+          upload_artifact: "true"     # 会尝试上传，但 Kingfisher 不会生成 .ipa
