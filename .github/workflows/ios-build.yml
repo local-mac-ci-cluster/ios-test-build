@@ -9,9 +9,6 @@ jobs:
   build:
     runs-on: [self-hosted, macos-latest]
     steps:
-      - name: 接入本地 Mac CI 集群
-        uses: local-mac-ci-cluster/local-mac-runner-action@main
-
       - name: 检出代码
         uses: actions/checkout@v4
 
