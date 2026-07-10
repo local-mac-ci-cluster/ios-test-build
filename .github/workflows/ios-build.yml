@@ -1,21 +1,29 @@
-name: iOS 编译测试
+name: iOS 项目构建
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: [self-hosted, macos-latest]
     steps:
+      # 1. 接入本地 Mac CI 集群
+      - name: 接入本地 Mac CI 集群
+        uses: local-mac-ci-cluster/local-mac-runner-action@main
+
+      # 2. 检出代码
       - name: 检出代码
         uses: actions/checkout@v4
 
-      - name: 编译 Kingfisher
-        run: |
-          xcodebuild -project Kingfisher.xcodeproj \
-            -scheme Kingfisher \
-            -configuration Release \
-            -derivedDataPath ./build \
-            CODE_SIGNING_ALLOWED=NO
+      # 3. 构建 iOS 应用
+      - name: 构建 iOS 应用
+        uses: local-mac-ci-cluster/local-mac-runner-action@main
+        with:
+          scheme: "Kingfisher"
+          project: "Kingfisher.xcodeproj"
+          configuration: "Release"
+          upload_artifact: "true"
