@@ -7,7 +7,7 @@ Kingfisher is a powerful, pure-Swift library for downloading and caching images 
 ## Quick Start
 
 **Core API Entry Points:**
-- `Sources/General/KingfisherManager.swift` - Central coordinator aaaa
+- `Sources/General/KingfisherManager.swift` - Central coordinator bbb
 - `Sources/General/KF.swift` - Builder pattern API (`KF.url()...`)
 - `Sources/Extensions/ImageView+Kingfisher.swift` - UIKit/AppKit extensions
 - `Sources/SwiftUI/KFImage.swift` - SwiftUI components
