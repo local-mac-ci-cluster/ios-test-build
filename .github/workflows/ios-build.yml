@@ -2,24 +2,33 @@ name: iOS 项目构建
 
 on:
   push:
-    branches: [ master, main ]
+    branches: [master, main]
   pull_request:
-    branches: [ master, main ]
+    branches: [master, main]
   workflow_dispatch:
 
 jobs:
   build:
+    # 标签与 Macrunara 节点上报的标签匹配（l4-agent runner.labels）
     runs-on: [macos, arm64, macrunara]
+    timeout-minutes: 30
+
     steps:
-      # 1. 接入本地 Mac CI 集群
-      - name: 接入本地 Mac CI 集群
-        uses: local-mac-ci-cluster/local-mac-runner-action@main
+      # 1. 打印构建环境信息（确认 job 跑在哪台 Mac 节点上，替代原"接入"步骤）
+      - name: 构建环境信息
+        run: |
+          echo "======================================"
+          echo "本地 Mac CI 集群 - iOS 构建"
+          echo "执行机器: $(hostname)"
+          echo "Runner:   $RUNNER_NAME"
+          echo "Xcode:    $(xcodebuild -version | head -1)"
+          echo "======================================"
 
       # 2. 检出代码
       - name: 检出代码
         uses: actions/checkout@v4
 
-      # 3. 构建 iOS 应用
+      # 3. 构建 iOS 应用（Release 配置，免签名，产物上传 Artifact）
       - name: 构建 iOS 应用
         uses: local-mac-ci-cluster/local-mac-runner-action@main
         with:
