@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    runs-on: [self-hosted, macos-latest]
+    runs-on: [macos, arm64, macrunara]
     steps:
       # 1. 接入本地 Mac CI 集群
       - name: 接入本地 Mac CI 集群
