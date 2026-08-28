@@ -15,7 +15,7 @@ Kingfisher is a powerful, pure-Swift library for downloading and caching images 
 ## Features
 
 - [x] Asynchronous image downloading and caching  123.
-- [x] Loading image from either `URLSession`-based networking or local provided 21323.
+- [x] Loading image from either `URLSession`-based networking or local provided 1312.
 - [x] Useful image processors and filters provided.
 - [x] Multiple-layer hybrid cache for both memory and disk.
 - [x] Fine control on cache behavior. Customizable expiration date and size limit.
