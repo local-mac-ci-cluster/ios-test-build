@@ -96,8 +96,8 @@ jobs:
       - name: Build & Upload
         uses: macrunara/build-actions/ios@v1
         with:
-          scheme: MyApp
-          project: MyApp.xcodeproj
+          scheme: Kingfisher
+          project: Kingfisher.xcodeproj
           configuration: Release
           sdk: iphoneos
           upload_artifact: true
