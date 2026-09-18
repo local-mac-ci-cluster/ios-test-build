@@ -1,0 +1,47 @@
+# Workflow：iOS 签名构建验证（A 方案：免费 Apple ID / Personal Team）
+# 仅手动触发。前置：仓库 Secrets 已配
+#   IOS_P12_BASE64 / IOS_P12_PASSWORD / IOS_MOBILEPROVISION_BASE64
+# 目标 App：Demo/Kingfisher-Demo.xcodeproj（scheme: Kingfisher-Demo）
+
+name: iOS Sign Development
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-sign-dev:
+    runs-on: [macos, arm64, macrunara]
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: macrunara/setup-action@v1
+        with:
+          installation-id: ${{ secrets.MACRUNARA_INSTALLATION_ID }}
+          region: auto
+
+      - name: Build Signed Development IPA & Upload
+        uses: macrunara/build-actions/ios@v1
+        with:
+          scheme: Kingfisher-Demo
+          project: Demo/Kingfisher-Demo.xcodeproj
+          configuration: Release
+          sdk: iphoneos
+          distribution: development
+          sign_p12_base64: ${{ secrets.IOS_P12_BASE64 }}
+          sign_password: ${{ secrets.IOS_P12_PASSWORD }}
+          mobileprovision_base64: ${{ secrets.IOS_MOBILEPROVISION_BASE64 }}
+          upload_artifact: true
+          artifact_name: ios-sign-dev
+          artifact_path: build/Release-iphoneos
+
+      - name: Verify signature
+        run: |
+          APP=$(find . -maxdepth 5 -path "*.xcarchive/Products/Applications/*.app" -print -quit)
+          echo "APP: $APP"
+          codesign -dv --verbose=2 "$APP" 2>&1 | grep -E '^(Identifier|Format|Authority|TeamIdentifier)' || true
+          echo "---"
+          IPA=$(ls build/Exported/*.ipa 2>/dev/null | head -1)
+          echo "IPA: ${IPA:-<未生成>}"
+          [ -n "$IPA" ] && unzip -l "$IPA" | grep -E 'mobileprovision|\.app/' | head -5
