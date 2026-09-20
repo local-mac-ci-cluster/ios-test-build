@@ -14,8 +14,6 @@ jobs:
     timeout-minutes: 30
     env:
       # runner 直连 github.com 不稳定（SSL_ERROR_SYSCALL），统一走内网代理
-      http_proxy: http://172.16.0.81:7890
-      https_proxy: http://172.16.0.81:7890
     steps:
       - uses: actions/checkout@v4
 
