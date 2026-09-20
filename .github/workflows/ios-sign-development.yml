@@ -22,7 +22,8 @@ jobs:
           region: auto
 
       - name: Build Signed Development IPA & Upload
-        uses: macrunara/build-actions/ios@v1
+        # uses: macrunara/build-actions/ios@v1
+        uses: macrunara/build-actions/ios@a90d3d12318b5e8a63a354bb5faf36897ccdb843
         with:
           scheme: Kingfisher-Demo
           project: Demo/Kingfisher-Demo.xcodeproj
