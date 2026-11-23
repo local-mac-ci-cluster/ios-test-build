@@ -1,3 +1,5 @@
+# ⚠️ 已停用：macrunara/setup-action 与 build-actions 产品线已放弃、仓库已转私有（2026-11-23），
+# 本 workflow 的 uses: 引用已不可解析，请勿手动触发；签名构建链路待以纯 run: 步骤重写后再启用。
 # Workflow：iOS 签名构建验证（A 方案：免费 Apple ID / Personal Team）
 # 仅手动触发。前置：仓库 Secrets 已配
 #   IOS_P12_BASE64 / IOS_P12_PASSWORD / IOS_MOBILEPROVISION_BASE64
