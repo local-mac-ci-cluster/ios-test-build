@@ -1,6 +1,7 @@
-# ⚠️ 已停用：macrunara/setup-action 与 build-actions 产品线已放弃、仓库已转私有（2026-11-23），
-# 本 workflow 的 uses: 引用已不可解析，请勿手动触发；签名构建链路待以纯 run: 步骤重写后再启用。
 # Workflow：iOS 签名构建验证（A 方案：免费 Apple ID / Personal Team）
+# 2026-11-24 重写：原 macrunara/setup-action + build-actions/ios 已随 Action 产品线
+# 放弃转私有，改为纯 run: 直调仓库内置脚本（.ci/scripts/，与原 Action 同源），
+# 签名行为与原 Action 完全一致（临时 keychain → 手动签名 archive → 导出 IPA）。
 # 仅手动触发。前置：仓库 Secrets 已配
 #   IOS_P12_BASE64 / IOS_P12_PASSWORD / IOS_MOBILEPROVISION_BASE64
 # 目标 App：Demo/Kingfisher-Demo.xcodeproj（scheme: Kingfisher-Demo）
@@ -14,31 +15,55 @@ jobs:
   build-sign-dev:
     runs-on: [macos, arm64, macrunara]
     timeout-minutes: 30
-    # env:
-      # runner 直连 github.com 不稳定（SSL_ERROR_SYSCALL），统一走内网代理
+
     steps:
       - uses: actions/checkout@v4
 
-      - uses: macrunara/setup-action@v1
-        with:
-          installation-id: ${{ secrets.MACRUNARA_INSTALLATION_ID }}
-          region: auto
+      # 签名材料先打码：后续任何步骤意外回显都会被 Actions 替换为 ***
+      - name: Mask signing secrets
+        run: |
+          echo "::add-mask::${{ secrets.IOS_P12_PASSWORD }}"
+          echo "::add-mask::${{ secrets.IOS_P12_BASE64 }}"
+          echo "::add-mask::${{ secrets.IOS_MOBILEPROVISION_BASE64 }}"
 
-      - name: Build Signed Development IPA & Upload
-        uses: macrunara/build-actions/ios@v1
-        # uses: macrunara/build-actions/ios@2f5608f8f1db16c1fd93f15e6de61dc7af00be20
+      # 临时 keychain + 证书/描述文件安装；产出的签名环境变量注入后续步骤
+      - name: Setup signing keychain
+        run: |
+          ENV_FILE="${RUNNER_TEMP}/signing.env"
+          bash .ci/scripts/setup-signing.sh \
+            "${{ secrets.IOS_P12_BASE64 }}" \
+            "${{ secrets.IOS_P12_PASSWORD }}" \
+            "${{ secrets.IOS_MOBILEPROVISION_BASE64 }}" \
+            "development" \
+            "$ENV_FILE"
+          cat "$ENV_FILE" >> "$GITHUB_ENV"
+
+      # SIGNING_ENABLED=1 时 build.sh 自动切换为手动签名 archive 模式
+      - name: Build & Archive (signed)
+        run: |
+          bash .ci/scripts/build.sh \
+            "Kingfisher-Demo" \
+            "Demo/Kingfisher-Demo.xcodeproj" \
+            "Release" \
+            "iphoneos"
+
+      # 无 .xcarchive 时跳过；导出失败仅输出 warning，不中断 workflow
+      - name: Export archive if present
+        run: bash .ci/scripts/export-archive.sh
+
+      - name: Upload build products
+        uses: actions/upload-artifact@v4
         with:
-          scheme: Kingfisher-Demo
-          project: Demo/Kingfisher-Demo.xcodeproj
-          configuration: Release
-          sdk: iphoneos
-          distribution: development
-          sign_p12_base64: ${{ secrets.IOS_P12_BASE64 }}
-          sign_password: ${{ secrets.IOS_P12_PASSWORD }}
-          mobileprovision_base64: ${{ secrets.IOS_MOBILEPROVISION_BASE64 }}
-          upload_artifact: true
-          artifact_name: ios-sign-dev
-          artifact_path: build/Release-iphoneos
+          name: ios-sign-dev
+          path: build/Release-iphoneos
+          if-no-files-found: warn
+
+      - name: Upload signed IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-sign-dev-signed-ipa
+          path: build/Exported/*.ipa
+          if-no-files-found: warn
 
       - name: Verify signature
         run: |
